@@ -1,93 +1,99 @@
-import axios from 'axios'
+import axios from 'axios';
 import { useState, useEffect } from 'react';
+import { BsSearch } from "react-icons/bs";
+import { TiAdjustBrightness } from "react-icons/ti";
+import { motion } from "framer-motion";
+import WeatherCards from './components/WeatherCards';
 
 function App() {
-  const [location, setLocation] = useState("");
+  const [location, setLocation] = useState("Delhi");
   const [data, setData] = useState({});
   const API_ID = import.meta.env.VITE_API_ID;
   const GEO_API_KEY = import.meta.env.VITE_GEO_API_KEY;
-  const url = `https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${API_ID}`
-
-
-
-  const search = (e) => {
-    if (e.key === 'Enter') {
-      axios.get(url)
-        .then(res => setData(JSON.parse(res.data)))
-        .catch(err => console.error(err.message))
-    }
-  }
+  const url = `https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${API_ID}`;
 
   useEffect(() => {
-    let lat = ""
-    let lon = ''
+    let lat = "", lon = "";
 
-    navigator.geolocation.getCurrentPosition(function (position) {
-      console.log(position.coords.latitude, position.coords.longitude);
+    navigator.geolocation.getCurrentPosition((position) => {
       lat = position.coords.latitude;
       lon = position.coords.longitude;
 
       axios.get(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lon}&key=${GEO_API_KEY}`)
         .then(res => {
-          // console.log(res.data.results[0].address_components[3].long_name)
-          const baseLocation = res.data.results[0].address_components[3].long_name
-          setLocation(res.data.results[0].address_components[3].long_name)
+          setLocation(res.data.results[0].address_components[3].long_name);
         })
-        .catch(err => console.error(err.message));
+        .catch(err => console.log(err.message));
     });
-  }, [])
+  }, []);
 
   useEffect(() => {
     axios.get(url)
       .then(res => {
-        console.log((res.data))
-        // setData((res.data))
-        // console.log(data)
-        const temp = res.data.main.temp
-        const humidity = res.data.main.humidity
-        const wind = res.data.wind.speed
-        const sunrise = res.data.sys.sunrise
-        const sunset = res.data.sys.sunset
-        const city = res.data.name
-        const country = res.data.sys.country
-        const description = res.data.weather[0].description
-        const icon = res.data.weather[0].icon
-        setData({
-          temp,
-          humidity,
-          wind,
-          sunrise,
-          sunset,
-          city,
-          country,
-          description,
-          icon
-        })
+        const { temp, humidity, pressure } = res.data.main;
+        const { speed: wind } = res.data.wind;
+        const { sunrise, sunset } = res.data.sys;
+        const { name: city, sys: { country } } = res.data;
+        const { main: description, icon } = res.data.weather[0];
+        const visibility = res.data.visibility;
+
+        setData({ temp, humidity, pressure, wind, sunrise, sunset, city, country, description, visibility, icon });
       })
-      .catch(err => console.error(err.message))
-  }, [location])
+      .catch(err => console.log(err.message));
+  }, [location]);
 
   return (
-    <div className='h-screen w-screen flex flex-col items-center justify-center'>
-      <div className='flex flex-col items-center justify-center w-fit px-40 py-20 bg-slate-100 rounded-lg'>
-        <h1 className='text-4xl font-bold mb-30'>Weather App</h1>
-        <input type="text" className='border mb-10' placeholder='Enter a location' onChange={(e) => setLocation(e.target.value)} onKeyDownCapture={search} />
-        {location?.length > 0 ? <div className='flex flex-col items-center justify-center'>
-          <p>Weather in {location}</p>
-          <p>{data.description}</p>
-          <img src={`http://openweathermap.org/img/wn/${data.icon}@2x.png`} alt={data.description} />
-          <div className='flex flex-col items-center justify-center'>
-            <p>Temperature: {data.temp}°C</p>
-            <p>Humidity: {data.humidity}%</p>
-            <p>Wind: {data.wind}m/s</p>
-            <p>Sunrise: {data.sunrise}</p>
-            <p>Sunset: {data.sunset}</p>
-          </div>
-        </div> : <p className='text-center'>Enter a location</p>}
-      </div>
+    <motion.div
+      className="h-screen w-full py-15 px-5 flex flex-col items-center justify-center bg-[url(./assets/background.png)] bg-cover bg-center bg-fixed"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 1 }}
+    >
+      <motion.div
+        className="flex flex-col items-center justify-center h-full max-md:w-full px-10 py-20 bg-white/20 rounded-lg shadow-2xl relative"
+        initial={{ y: 50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+      >
+        <motion.h1
+          className="text-5xl font-bold mb-10 text-slate-800"
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.7 }}
+        >
+          Weather Y<TiAdjustBrightness className='inline w-8 text-white/90' />u
+        </motion.h1>
 
-    </div>
-  )
+        <motion.div
+          className="flex flex-row items-center py-2 bg-gray-50 gap-2 p-1 rounded-3xl shadow-md mb-2"
+          whileTap={{ scale: 0.95 }}
+        >
+          <BsSearch className="text-2xl ml-2 text-bold text-blue-500" />
+          <input
+            type="text"
+            className="outline-none w-md max-md:w-fit"
+            placeholder="Enter a location"
+            onChange={(e) => setLocation(e.target.value)}
+            onKeyDownCapture={(e) => e.target.value=""}
+          />
+        </motion.div>
+
+        {location?.length > 0 ? (
+          <motion.div
+            className="flex flex-col items-center justify-center"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <p>Today's weather in <span className="text-slate-600 text-xl ml-1">{location}</span></p>
+            <WeatherCards data={data} />
+          </motion.div>
+        ) : (
+          <motion.p className="text-center">Enter a location</motion.p>
+        )}
+      </motion.div>
+    </motion.div>
+  );
 }
 
-export default App
+export default App;

@@ -23,7 +23,7 @@ const WeatherCards = ({ data }) => {
                 <motion.div
                     key={index}
                     variants={cardVariants}
-                    className={`p-4 rounded-xl shadow-md text-white text-center bg-gradient-to-r ${item.gradient} backdrop-blur-lg`}
+                    className={`p-4 w-full rounded-xl shadow-md text-white text-center bg-gradient-to-r ${item.gradient} backdrop-blur-lg`}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                 >

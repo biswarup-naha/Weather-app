@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import WeatherCards from './components/WeatherCards';
 
 function App() {
-  const [location, setLocation] = useState("Delhi");
+  const [location, setLocation] = useState("");
   const [data, setData] = useState({});
   const API_ID = import.meta.env.VITE_API_ID;
   const GEO_API_KEY = import.meta.env.VITE_GEO_API_KEY;
@@ -56,7 +56,7 @@ function App() {
         transition={{ duration: 0.8, ease: "easeOut" }}
       >
         <motion.h1
-          className="text-5xl font-bold mb-10 text-slate-800"
+          className="text-5xl font-bold mb-10 text-slate-800 max-md:text-3xl"
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.7 }}
@@ -74,7 +74,7 @@ function App() {
             className="outline-none w-md max-md:w-fit"
             placeholder="Enter a location"
             onChange={(e) => setLocation(e.target.value)}
-            onKeyDownCapture={(e) => e.target.value=""}
+            onKeyDownCapture={(e) => { if (e.key === "Enter") e.target.value = "" }}
           />
         </motion.div>
 
@@ -86,6 +86,13 @@ function App() {
             transition={{ duration: 0.6 }}
           >
             <p>Today's weather in <span className="text-slate-600 text-xl ml-1">{location}</span></p>
+            <motion.div className='flex items-center justify-center gap-5 mt-5'>
+              <img src={`https://openweathermap.org/img/wn/${data.icon}@2x.png`} alt="weather icon" className="w-20 h-20 mb-5 rounded-full shadow-lg bg-white/50" />
+              <div>
+                <p className='text-4xl text-white text-center'>{Math.ceil(data.temp-273.15)} °C</p>
+                <p className="text-2xl font-bold text-slate-600">{data.description}</p>
+              </div>
+            </motion.div>
             <WeatherCards data={data} />
           </motion.div>
         ) : (

@@ -6,41 +6,56 @@ import { motion } from "framer-motion";
 import WeatherCards from './components/WeatherCards';
 
 function App() {
+  const [currLocation, setCurrLocation] = useState("");
   const [location, setLocation] = useState("");
   const [data, setData] = useState({});
   const API_ID = import.meta.env.VITE_API_ID;
   const GEO_API_KEY = import.meta.env.VITE_GEO_API_KEY;
-  const url = `https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${API_ID}`;
+  const url = `https://api.weatherapi.com/v1/forecast.json?key=${API_ID}&q=${location}&days=3`;
+
+  async function fetchLocation(lat, lon) {
+    let city = "";
+    await axios.get(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lon}&key=${GEO_API_KEY}`)
+      .then(res => {
+        city = res.data.results[0].address_components[3].long_name;
+      })
+      .catch(err => console.log(err.message));
+    setLocation(city);
+    setCurrLocation(city);
+  }
 
   useEffect(() => {
     let lat = "", lon = "";
 
-    navigator.geolocation.getCurrentPosition((position) => {
+    navigator.geolocation.getCurrentPosition(async (position) => {
       lat = position.coords.latitude;
       lon = position.coords.longitude;
 
-      axios.get(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lon}&key=${GEO_API_KEY}`)
-        .then(res => {
-          setLocation(res.data.results[0].address_components[3].long_name);
-        })
-        .catch(err => console.log(err.message));
+      await fetchLocation(lat, lon);
+      await fetchWeather();
     });
-  }, []);
+  }, [location]);
 
-  useEffect(() => {
-    axios.get(url)
+  async function fetchWeather() { 
+    await axios.get(url)
       .then(res => {
-        const { temp, humidity, pressure } = res.data.main;
-        const { speed: wind } = res.data.wind;
-        const { sunrise, sunset } = res.data.sys;
-        const { name: city, sys: { country } } = res.data;
-        const { main: description, icon } = res.data.weather[0];
-        const visibility = res.data.visibility;
+        const { temp_c, is_day, wind_mph, humidity, pressure_mb, uv, precip_mm, vis_km, condition: { text, icon } } = res.data.current;
+        const { name, region, country, localtime } = res.data.location;
 
-        setData({ temp, humidity, pressure, wind, sunrise, sunset, city, country, description, visibility, icon });
+        setData({ temp_c, humidity, pressure_mb, wind_mph, name, region, country, is_day, text, icon, uv, precip_mm, vis_km, localtime });
       })
       .catch(err => console.log(err.message));
-  }, [location]);
+  }
+  // useEffect(() => {
+  //   axios.get(url)
+  //     .then(res => {
+  //       const { temp_c, is_day, wind_mph, humidity, pressure_mb, uv, precip_mm, vis_km, condition: { text, icon } } = res.data.current;
+  //       const { name, region, country, localtime } = res.data.location;
+
+  //       setData({ temp_c, humidity, pressure_mb, wind_mph, name, region, country, is_day, text, icon, uv, precip_mm, vis_km, localtime });
+  //     })
+  //     .catch(err => console.log(err.message));
+  // }, [location]);
 
   return (
     <motion.div
@@ -78,25 +93,34 @@ function App() {
           />
         </motion.div>
 
-        {location?.length > 0 ? (
+        {location.length > 0 ? (
           <motion.div
             className="flex flex-col items-center justify-center"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <p>Today's weather in <span className="text-slate-600 text-xl ml-1">{location}</span></p>
-            <motion.div className='flex items-center justify-center gap-5 mt-5'>
-              <img src={`https://openweathermap.org/img/wn/${data.icon}@2x.png`} alt="weather icon" className="w-20 h-20 mb-5 rounded-full shadow-lg bg-white/50" />
+            <p className='font-light text-slate-600'>Today's weather in <span className="text-slate-800 text-xl ml-1 max-md:text-md">{data.name+", "+data.region+", "+data.country}</span></p>
+            <motion.div className='flex items-center justify-center gap-5 mt-5' initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}>
+              <img src={data.icon} alt="weather icon" className="w-20 h-20 mb-5 rounded-full shadow-lg bg-white/50 aspect-square" />
               <div>
-                <p className='text-4xl text-white text-center'>{Math.ceil(data.temp-273.15)} °C</p>
-                <p className="text-2xl font-bold text-slate-600">{data.description}</p>
+                <p className='text-4xl text-white text-center'>{data.temp_c} °C</p>
+                <p className="text-2xl font-bold text-slate-600">{data.is_day ? data.text + ", Day" : data.text + ", Night"}</p>
+                
               </div>
             </motion.div>
             <WeatherCards data={data} />
+            <p className="text-sm font-bold text-slate-700 mt-10">Last updated at: &nbsp; {data.localtime}</p>
           </motion.div>
         ) : (
-          <motion.p className="text-center">Enter a location</motion.p>
+            <motion.button whileHover={{ scale: 1.02 }} transition={{ duration: 0.25, ease: "easeIn" }} className="text-center text-2xl mt-4 text-bold text-blue-500 border rounded-2xl p-2 hover:bg-blue-400 hover:text-white" onClick={() => {
+              setLocation(currLocation);
+              // window.location.search("/")
+            }}>
+              Show current location
+            </motion.button>
         )}
       </motion.div>
     </motion.div>

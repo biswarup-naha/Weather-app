@@ -44,11 +44,11 @@ function App() {
   return (
 
 
-    // data.name != undefined ? (<WeatherMain location={location} data={data} setLocation={setLocation} currLocation={currLocation} />) :
-    //   <div className='bg-[url(./assets/background.png)] bg-cover bg-center bg-fixed h-screen w-full py-15 px-5 flex flex-col items-center justify-center text-3xl'>
-    //     Loading...
-    //   </div>
-    <WeatherMain location={location} data={data} setLocation={setLocation} currLocation={currLocation} />
+    data.name != undefined ? (<WeatherMain location={location} data={data} setLocation={setLocation} currLocation={currLocation} />) :
+      <div className='bg-[url(./assets/background.png)] bg-cover bg-center bg-fixed h-screen w-full py-15 px-5 flex flex-col items-center justify-center text-3xl'>
+        Loading...
+      </div>
+    // <WeatherMain location={location} data={data} setLocation={setLocation} currLocation={currLocation} />
 
   );
 }

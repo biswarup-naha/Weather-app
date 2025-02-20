@@ -15,7 +15,7 @@ const WeatherCards = ({ data }) => {
             {[
                 { label: "Humidity", value: `${data.humidity}%`, gradient: "from-blue-500/40 to-indigo-500/40" },
                 { label: "Wind", value: `${data.wind_mph} mph`, gradient: "from-green-500/40 to-teal-500/40" },
-                { label: "Pressure", value: `${data.pressure_mb} hPa`, gradient: "from-purple-500/40 to-pink-500/40" },
+                { label: "Pressure", value: `${data.pressure_mb} mb`, gradient: "from-purple-500/40 to-pink-500/40" },
                 { label: "UV index", value: data.uv, gradient: "from-yellow-500/40 to-orange-500/40" },
                 { label: "Precipitation", value: `${data.precip_mm} mm`, gradient: "from-red-500/40 to-rose-500/40" },
                 { label: "Visibility", value: `${data.vis_km} km`, gradient: "from-cyan-500/40 to-blue-500/40" },

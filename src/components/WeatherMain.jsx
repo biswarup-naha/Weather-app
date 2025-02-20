@@ -48,7 +48,7 @@ const WeatherMain = ({ location, data, setLocation, currLocation }) => {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.6 }}
                   >
-                      <p className='font-light text-slate-600'>Today's weather in <span className="text-slate-800 text-xl ml-1 max-md:text-md">{data.name + ", " + data.region + ", " + data.country}</span></p>
+                      <p className='font-light text-slate-600'>Today's weather in <span className="text-slate-800 text-xl ml-1 max-md:text-md">{data.name + (data.region && ", " + data.region) + ", " + data.country}</span></p>
                       <motion.div className='flex items-center justify-center gap-5 mt-5' initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.6 }}>
